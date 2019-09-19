@@ -45,11 +45,11 @@ block-demo-sifive/rtl :
                                                                              
                                                                              
                                                                              
-## Question
-1. What about the procedure for on-boarding of demo block 
+## Question & Answer
+Q1. What about the procedure for on-boarding of demo block 
    (including PWM, capctl, pio, loopback module)
 
-2. Can we on-board seperate module? or do we have to make top verilog module for onboarding?
+Q2. Can we on-board seperate module? or do we have to make top verilog module for onboarding?
 
 
                                                                              
