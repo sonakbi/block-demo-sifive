@@ -57,6 +57,7 @@
                         "viewRef": "RTLview",
                         "portMaps": {
                             "PCLK": "PCLK",
+                            "PSELx": "PSELPTC",
                             "PWRITE": "PWRITE",
                             "__UMAP__": [
                                 [
@@ -75,7 +76,6 @@
                                     "capt4_event",
                                     "capt5_event"
                                 ],
-                                "PSELPTC",
                                 [
                                     "INTptc0",
                                     "INTptc1",
