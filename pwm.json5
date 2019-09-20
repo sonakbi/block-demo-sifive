@@ -1,0 +1,105 @@
+{
+  component: {
+    vendor: 'sifive',
+    library: 'blocks',
+    name: 'PWM',
+    version: '0.1.0',
+    busInterfaces: [],
+    addressSpaces: [],
+    memoryMaps: [],
+    model: {
+      views: [],
+      busInterfaces: {
+        $ref: '#/definitions/busint-portgroup_0-mapping_0-prefix_-slave-APB4_rtl',
+      },
+      ports: {
+        $ref: '#/definitions/ports',
+      },
+    },
+    fileSets: {
+      VerilogFiles: ['PWM.v', 'PTC.v']
+    },
+    pSchema: {},
+  },
+  definitions: {
+    ports: {
+      PCLK: 1,
+      PRESETn: 1,
+      PENABLE: 1,
+      PSELPTC: 1,
+      PADDR: 7,
+      PWRITE: 1,
+      PWDATA: 32,
+      PRDATA: -32,
+      INTptc0: -1,
+      INTptc1: -1,
+      INTptc2: -1,
+      INTptc3: -1,
+      INTptc4: -1,
+      INTptc5: -1,
+      capt0_event: 1,
+      capt1_event: 1,
+      capt2_event: 1,
+      capt3_event: 1,
+      capt4_event: 1,
+      capt5_event: 1,
+      PWM_OUT0: -1,
+      PWM_OUT1: -1,
+      PWM_OUT2: -1,
+      PWM_OUT3: -1,
+      PWM_OUT4: -1,
+      PWM_OUT5: -1,
+    },
+            "busint-portgroup_0-mapping_0-prefix_-slave-APB4_rtl": {
+                "name": "",
+                "abstractionTypes": [
+                    {
+                        "viewRef": "RTLview",
+                        "portMaps": {
+                            "PCLK": "PCLK",
+                            "PWRITE": "PWRITE",
+                            "__UMAP__": [
+                                [
+                                    "PWM_OUT0",
+                                    "PWM_OUT1",
+                                    "PWM_OUT2",
+                                    "PWM_OUT3",
+                                    "PWM_OUT4",
+                                    "PWM_OUT5"
+                                ],
+                                [
+                                    "capt0_event",
+                                    "capt1_event",
+                                    "capt2_event",
+                                    "capt3_event",
+                                    "capt4_event",
+                                    "capt5_event"
+                                ],
+                                "PSELPTC",
+                                [
+                                    "INTptc0",
+                                    "INTptc1",
+                                    "INTptc2",
+                                    "INTptc3",
+                                    "INTptc4",
+                                    "INTptc5"
+                                ]
+                            ],
+                            "PADDR": "PADDR",
+                            "PRDATA": "PRDATA",
+                            "PENABLE": "PENABLE",
+                            "PWDATA": "PWDATA",
+                            "PRESETn": "PRESETn"
+                        }
+                    }
+                ],
+                "interfaceMode": "slave",
+                "busType": {
+                    "library": "AMBA4",
+                    "name": "APB4",
+                    "version": "r0p0_0",
+                    "vendor": "amba.com"
+                }
+            },
+  },
+}

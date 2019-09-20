@@ -8,7 +8,7 @@ module PWM (PCLK, PRESETn, PENABLE, PSELPTC, PADDR, PWRITE, PWDATA, PRDATA,
   input         PRESETn;
   input         PENABLE;
   input         PSELPTC;
-  input   [6:2] PADDR;
+  input   [6:0] PADDR;
   input         PWRITE;
   input  [31:0] PWDATA;
   output [31:0] PRDATA;

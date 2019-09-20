@@ -1,0 +1,99 @@
+{
+  component: {
+    vendor: 'sifive',
+    library: 'blocks',
+    name: 'capctl',
+    version: '0.1.0',
+    busInterfaces: [],
+    addressSpaces: [],
+    memoryMaps: [],
+    "busInterfaces": [
+        {"$ref": "#/definitions/busint-portgroup_0-mapping_0-prefix_t_ctrl-slave-AXI4-Lite_rtl"}
+    ],
+    model: {
+      views: [],
+      ports: {
+        $ref: '#/definitions/ports',
+      },
+    },
+    componentGenerators: [],
+    fileSets: {
+      VerilogFiles: ['capctl.v']
+    },
+    fileSets: {},
+    pSchema: {},
+  },
+  definitions: {
+    ports: {
+      t_ctrl_awvalid: 1,
+      t_ctrl_awready: -1,
+      t_ctrl_awaddr: 32,
+      t_ctrl_awprot: 3,
+      t_ctrl_wvalid: 1,
+      t_ctrl_wready: -1,
+      t_ctrl_wdata: 32,
+      t_ctrl_wstrb: 1,
+      t_ctrl_bvalid: -1,
+      t_ctrl_bready: 1,
+      t_ctrl_bresp: -2,
+      t_ctrl_arvalid: 1,
+      t_ctrl_arready: -1,
+      t_ctrl_araddr: 32,
+      t_ctrl_arprot: 3,
+      t_ctrl_rvalid: -1,
+      t_ctrl_rready: 1,
+      t_ctrl_rdata: -32,
+      t_ctrl_rresp: -2,
+      odata: -6,
+      oenable: -6,
+      clk: 1,
+      reset_n: 1,
+    },
+    "busint-portgroup_0-mapping_0-prefix_t_ctrl-slave-AXI4-Lite_rtl": {
+        "interfaceMode": "slave",
+        "busType": {
+            "version": "r0p0_0",
+            "name": "AXI4-Lite",
+            "vendor": "amba.com",
+            "library": "AMBA4"
+        },
+        "abstractionTypes": [
+            {
+                "portMaps": {
+
+								    "ACLK"		: 'clk',
+								    // "ACLKEN"	: '',
+								    "ARESETn"	: 'reset_n',
+								    // "AWUSER"	: '',
+								    // "WUSER"		: '',
+								    // "BUSER"		: '',
+								    // "ARUSER"	: '',
+								    // "RUSER"		: '',
+
+                    "ARPROT": "t_ctrl_arprot",
+                    "BREADY": "t_ctrl_bready",
+                    "BVALID": "t_ctrl_bvalid",
+                    "BRESP": "t_ctrl_bresp",
+                    "WREADY": "t_ctrl_wready",
+                    "RRESP": "t_ctrl_rresp",
+                    "ARVALID": "t_ctrl_arvalid",
+                    "ARREADY": "t_ctrl_arready",
+                    "AWPROT": "t_ctrl_awprot",
+                    "RREADY": "t_ctrl_rready",
+                    "WSTRB": "t_ctrl_wstrb",
+                    "RVALID": "t_ctrl_rvalid",
+                    "AWADDR": "t_ctrl_awaddr",
+                    "WVALID": "t_ctrl_wvalid",
+                    "RDATA": "t_ctrl_rdata",
+                    "ARADDR": "t_ctrl_araddr",
+                    "AWREADY": "t_ctrl_awready",
+                    "WDATA": "t_ctrl_wdata",
+                    "AWVALID": "t_ctrl_awvalid"
+                },
+                "viewRef": "RTLview"
+            }
+        ],
+        "name": "t_ctrl"
+    },
+  },
+}

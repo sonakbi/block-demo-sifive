@@ -12,7 +12,7 @@ instead of DDR4 verilog files as below figure.
         APB inf.       AXI inf.     AXI inf.                                     
          ^               ^            ^                                          
          |               |            |                                          
-   ----- | ------------- | ---------- | --------           
+  +----- | ------------- | ---------- | --------+          
   |      |               |            |         |
   |      |               V            V         |
   |      |          +----------+ +----------+   |
@@ -29,7 +29,7 @@ instead of DDR4 verilog files as below figure.
   | | PTC0 PTC1 ... PTC5       |                |
   | +--------------------------+                |
   |                                     demo    |
-   ---------------------------------------------+          
+  +---------------------------------------------+          
   (demo block : made simuiler to the structure of DDR ctl&phy)
                                                                              
 
@@ -46,7 +46,7 @@ block-demo-sifive/rtl :
                                                                              
                                                                              
 ## Question & Answer
-Q1. What about the procedure for on-boarding of demo block 
+Q1. What about the procedure for on-boarding of demo block?
    (including PWM, capctl, pio, loopback module)
 
 Q2. Can we on-board seperate module? or do we have to make top verilog module for onboarding?
