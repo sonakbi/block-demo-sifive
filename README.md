@@ -8,7 +8,7 @@ instead of DDR4 verilog files as below figure.
 
                                                                              
                                                                              
-                                                                             
+`                                                                             
         APB inf.       AXI inf.     AXI inf.                                     
          ^               ^            ^                                          
          |               |            |                                          
@@ -31,7 +31,7 @@ instead of DDR4 verilog files as below figure.
   |                                     demo    |
   +---------------------------------------------+          
   (demo block : made simuiler to the structure of DDR ctl&phy)
-                                                                             
+                `                                                             
 
 
 [verilog files]                                                                             
