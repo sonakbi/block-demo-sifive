@@ -35,12 +35,13 @@ instead of DDR4 verilog files as below figure.
 
 
 [verilog files]                                                                             
-block-demo-sifive/rtl :
-  ./rtl/loopback/loopback.sv
+block-demo-sifive/rtl : 
+```  ./rtl/loopback/loopback.sv
   ./rtl/pio/pio.sv
   ./rtl/pwm/PWM.v        : pwm verilog file
   ./rtl/pwm/PTC.v        : ptc verilog file
   ./rtl/capctl/capctl.sv : for controlling cap signal
+```                                                                             
                                                                              
                                                                              
                                                                              
