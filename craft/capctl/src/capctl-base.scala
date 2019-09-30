@@ -69,37 +69,29 @@ case class capctlParams(
   cacheBlockBytes: Int
 )
 
-
-class t_ctrlBundle() extends Bundle {
-  val `ACLK` = Input(Bool())
-  val `ARESETn` = Input(Bool())
-  val `ARPROT` = Input(UInt((3).W))
-  val `BREADY` = Input(Bool())
-  val `BVALID` = Output(Bool())
-  val `BRESP` = Output(UInt((2).W))
-  val `WREADY` = Output(Bool())
-  val `RRESP` = Output(UInt((2).W))
-  val `ARVALID` = Input(Bool())
-  val `ARREADY` = Output(Bool())
-  val `AWPROT` = Input(UInt((3).W))
-  val `RREADY` = Input(Bool())
-  val `WSTRB` = Input(Bool())
-  val `RVALID` = Output(Bool())
-  val `AWADDR` = Input(UInt((32).W))
-  val `WVALID` = Input(Bool())
-  val `RDATA` = Output(UInt((32).W))
-  val `ARADDR` = Input(UInt((32).W))
-  val `AWREADY` = Output(Bool())
-  val `WDATA` = Input(UInt((32).W))
-  val `AWVALID` = Input(Bool())
-}
+// busType: AXI4Lite, mode: slave
 
 class LcapctlBase(c: capctlParams)(implicit p: Parameters) extends LazyModule {
   val device = new SimpleDevice("capctl", Seq("sifive,capctl-v0"))
 
 
 
-  val t_ctrlNode = BundleBridgeSource(() => new t_ctrlBundle)
+  val t_ctrlNode = AXI4SlaveNode(Seq(
+    AXI4SlavePortParameters(
+      slaves = Seq(
+        AXI4SlaveParameters(
+          //@tom address       = List(AddressSet(c.t_ctrlParams.base, ((1L << 32) - 1))),
+          address       = List(AddressSet(c.t_ctrlParams.base, ((1L << 10) - 1))),
+          executable    = c.t_ctrlParams.executable,
+          supportsWrite = TransferSizes(1, (32 / 8)),
+          supportsRead  = TransferSizes(1, (32 / 8)),
+          interleavedId = Some(0)
+        )
+      ),
+      beatBytes = 32 / 8
+    )
+  ))
+
 
   val ioBridgeSource = BundleBridgeSource(() => new capctlBlackBoxIO(
 
@@ -110,7 +102,7 @@ class LcapctlBase(c: capctlParams)(implicit p: Parameters) extends LazyModule {
 
     ))
     // interface wiring 2
-    // busType: AXI4-Lite, mode: slave
+
     // port wiring
     blackbox.io.t_ctrl_awvalid := ioBridgeSource.bundle.t_ctrl_awvalid
     ioBridgeSource.bundle.t_ctrl_awready := blackbox.io.t_ctrl_awready
@@ -136,15 +128,71 @@ class LcapctlBase(c: capctlParams)(implicit p: Parameters) extends LazyModule {
     blackbox.io.clk := ioBridgeSource.bundle.clk
     blackbox.io.reset_n := ioBridgeSource.bundle.reset_n
     // interface alias
-    val t_ctrl0 = t_ctrlNode.out(0)._1
+    val t_ctrl0 = t_ctrlNode.in(0)._1
     // interface wiring
-    // wiring for t_ctrl of type AXI4-Lite
-    // {"ACLK":"clk","ARESETn":"reset_n","ARPROT":"t_ctrl_arprot","BREADY":"t_ctrl_bready","BVALID":"t_ctrl_bvalid","BRESP":"t_ctrl_bresp","WREADY":"t_ctrl_wready","RRESP":"t_ctrl_rresp","ARVALID":"t_ctrl_arvalid","ARREADY":"t_ctrl_arready","AWPROT":"t_ctrl_awprot","RREADY":"t_ctrl_rready","WSTRB":"t_ctrl_wstrb","RVALID":"t_ctrl_rvalid","AWADDR":"t_ctrl_awaddr","WVALID":"t_ctrl_wvalid","RDATA":"t_ctrl_rdata","ARADDR":"t_ctrl_araddr","AWREADY":"t_ctrl_awready","WDATA":"t_ctrl_wdata","AWVALID":"t_ctrl_awvalid"}
+    // wiring for t_ctrl of type AXI4Lite
+    // -> {"aw":{"valid":1,"ready":-1,"bits":{"id":"awIdWidth","addr":"awAddrWidth","len":8,"size":3,"burst":2,"lock":1,"cache":4,"prot":3,"qos":4}},"w":{"valid":1,"ready":-1,"bits":{"data":"wDataWidth","strb":"wStrbWidth","last":1}},"b":{"valid":-1,"ready":1,"bits":{"id":"-bIdWidth","resp":-2}},"ar":{"valid":1,"ready":-1,"bits":{"id":"arIdWidth","addr":"addrWidth","len":8,"size":3,"burst":2,"lock":1,"cache":4,"prot":3,"qos":4}},"r":{"valid":-1,"ready":1,"bits":{"id":"-rIdWidth","data":"-dataWidth","resp":-2,"last":-1}}}// aw
+    blackbox.io.t_ctrl_awvalid := t_ctrl0.aw.valid
+    t_ctrl0.aw.ready := blackbox.io.t_ctrl_awready
+    // aw
+    // AWID
+    blackbox.io.t_ctrl_awaddr := t_ctrl0.aw.bits.addr
+    // AWLEN
+    // AWSIZE
+    // AWBURST
+    // AWLOCK
+    // AWCACHE
+    blackbox.io.t_ctrl_awprot := t_ctrl0.aw.bits.prot
+    // AWQOS
+    // w
+    blackbox.io.t_ctrl_wvalid := t_ctrl0.w.valid
+    t_ctrl0.w.ready := blackbox.io.t_ctrl_wready
+    // w
+    blackbox.io.t_ctrl_wdata := t_ctrl0.w.bits.data
+    blackbox.io.t_ctrl_wstrb := t_ctrl0.w.bits.strb
+    // WLAST
+    // b
+    t_ctrl0.b.valid := blackbox.io.t_ctrl_bvalid
+    blackbox.io.t_ctrl_bready := t_ctrl0.b.ready
+    // b
+    t_ctrl0.b.bits.id := 0.U // BID
+    t_ctrl0.b.bits.resp := blackbox.io.t_ctrl_bresp
+    // ar
+    blackbox.io.t_ctrl_arvalid := t_ctrl0.ar.valid
+    t_ctrl0.ar.ready := blackbox.io.t_ctrl_arready
+    // ar
+    // ARID
+    blackbox.io.t_ctrl_araddr := t_ctrl0.ar.bits.addr
+    // ARLEN
+    // ARSIZE
+    // ARBURST
+    // ARLOCK
+    // ARCACHE
+    blackbox.io.t_ctrl_arprot := t_ctrl0.ar.bits.prot
+    // ARQOS
+    // r
+    t_ctrl0.r.valid := blackbox.io.t_ctrl_rvalid
+    blackbox.io.t_ctrl_rready := t_ctrl0.r.ready
+    // r
+    t_ctrl0.r.bits.id := 0.U // RID
+    t_ctrl0.r.bits.data := blackbox.io.t_ctrl_rdata
+    t_ctrl0.r.bits.resp := blackbox.io.t_ctrl_rresp
+    t_ctrl0.r.bits.last := true.B // RLAST
+
   }
   lazy val module = new LcapctlBaseImp
 }
 
-case class Pt_ctrlParams() // name: AXI4-Lite, mode: slave
+
+case class Pt_ctrlParams(
+  base: BigInt,
+  executable: Boolean = false,
+  maxFifoBits: Int = 2,
+  maxTransactions: Int = 1,
+  axi4BufferParams: AXI4BufferParams = AXI4BufferParams(),
+  tlBufferParams: TLBufferParams = TLBufferParams()
+)
+
 
 case class NcapctlTopParams(
   blackbox: capctlParams
@@ -154,10 +202,11 @@ case class NcapctlTopParams(
 
 object NcapctlTopParams {
   def defaults(
+    t_ctrl_base: BigInt,
     cacheBlockBytes: Int
   ) = NcapctlTopParams(
     blackbox = capctlParams(
-      t_ctrlParams = Pt_ctrlParams(),
+      t_ctrlParams = Pt_ctrlParams(base = t_ctrl_base),
       cacheBlockBytes = cacheBlockBytes
     )
   )
@@ -168,8 +217,29 @@ class NcapctlTopBase(c: NcapctlTopParams)(implicit p: Parameters) extends Simple
 
 // no channel node
 
-  val t_ctrlNode = BundleBridgeSink[t_ctrlBundle]
-  t_ctrlNode := imp.t_ctrlNode
+  val t_ctrlNode: AXI4SlaveNode = imp.t_ctrlNode
+
+  def gett_ctrlNodeTLAdapter(): TLInwardNode = {(
+    t_ctrlNode
+      := AXI4Buffer(
+        aw = c.blackbox.t_ctrlParams.axi4BufferParams.aw,
+        ar = c.blackbox.t_ctrlParams.axi4BufferParams.ar,
+        w = c.blackbox.t_ctrlParams.axi4BufferParams.w,
+        r = c.blackbox.t_ctrlParams.axi4BufferParams.r,
+        b = c.blackbox.t_ctrlParams.axi4BufferParams.b
+      )
+      := AXI4UserYanker(capMaxFlight = Some(c.blackbox.t_ctrlParams.maxTransactions))
+      := TLToAXI4()
+      := TLFragmenter((32 / 8), c.blackbox.cacheBlockBytes, holdFirstDeny=true)
+      := TLBuffer(
+        a = c.blackbox.t_ctrlParams.tlBufferParams.a,
+        b = c.blackbox.t_ctrlParams.tlBufferParams.b,
+        c = c.blackbox.t_ctrlParams.tlBufferParams.c,
+        d = c.blackbox.t_ctrlParams.tlBufferParams.d,
+        e = c.blackbox.t_ctrlParams.tlBufferParams.e
+      )
+  )}
+
 }
 
 object NcapctlTopBase {
@@ -177,18 +247,19 @@ object NcapctlTopBase {
     implicit val p: Parameters = bap.p
     val capctl_top = LazyModule(new NcapctlTop(c))
     // no channel attachment
-    // busType: AXI4-Lite, mode: slave
+    bap.pbus.coupleTo("axi") { capctl_top.gett_ctrlNodeTLAdapter() := TLWidthWidget(bap.pbus) := _ }
     capctl_top
   }
 }
 
 class WithcapctlTopBase (
-
+  t_ctrl_base: BigInt
 ) extends Config((site, here, up) => {
   case BlockDescriptorKey =>
     BlockDescriptor(
       name = "capctl",
       place = NcapctlTop.attach(NcapctlTopParams.defaults(
+        t_ctrl_base = t_ctrl_base,
         cacheBlockBytes = site(CacheBlockBytes)
       ))
     ) +: up(BlockDescriptorKey, site)

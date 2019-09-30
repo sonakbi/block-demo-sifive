@@ -35,6 +35,17 @@ class NPWMTop(c: NPWMTopParams)(implicit p: Parameters) extends NPWMTopBase(c)(p
 {
 
 // User code here
+  // route the ports of the black box to this sink
+  val ioBridgeSink = BundleBridgeSink[PWMBlackBoxIO]()
+  ioBridgeSink := imp.ioBridgeSource
+
+  // logic to connect ioBridgeSink/Source nodes
+  override lazy val module = new LazyModuleImp(this) {
+
+    // connect the clock and negedge reset to the default clock and reset
+    ioBridgeSink.bundle.PCLK    := clock.asUInt
+    ioBridgeSink.bundle.PRESETn := !(reset.toBool)
+  }
 
 }
 
@@ -43,6 +54,7 @@ object NPWMTop {
     val PWM = NPWMTopBase.attach(c)(bap)
 
     // User code here
+    implicit val p: Parameters = bap.p
 
     PWM
   }
@@ -50,7 +62,8 @@ object NPWMTop {
 
 class WithPWMTop extends Config(
   new WithPWMTopBase(
-
+    //ctrl_base = 0x60000L
+    ctrl_base = 0x40000L
   )
 
     // User code here

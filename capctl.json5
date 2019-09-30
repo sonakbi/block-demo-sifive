@@ -1,28 +1,4 @@
 {
-  component: {
-    vendor: 'sifive',
-    library: 'blocks',
-    name: 'capctl',
-    version: '0.1.0',
-    busInterfaces: [],
-    addressSpaces: [],
-    memoryMaps: [],
-    "busInterfaces": [
-        {"$ref": "#/definitions/busint-portgroup_0-mapping_0-prefix_t_ctrl-slave-AXI4-Lite_rtl"}
-    ],
-    model: {
-      views: [],
-      ports: {
-        $ref: '#/definitions/ports',
-      },
-    },
-    componentGenerators: [],
-    fileSets: {
-      VerilogFiles: ['capctl.v']
-    },
-    fileSets: {},
-    pSchema: {},
-  },
   definitions: {
     ports: {
       t_ctrl_awvalid: 1,
@@ -49,51 +25,86 @@
       clk: 1,
       reset_n: 1,
     },
-    "busint-portgroup_0-mapping_0-prefix_t_ctrl-slave-AXI4-Lite_rtl": {
+    ctrlPortMap: {
+      "ACLK"		: 'clk',
+      // "ACLKEN"	: '',
+      "ARESETn"	: 'reset_n',
+      // "AWUSER"	: '',
+      // "WUSER"		: '',
+      // "BUSER"		: '',
+      // "ARUSER"	: '',
+      // "RUSER"		: '',
+      
+      "ARPROT": "t_ctrl_arprot",
+      "BREADY": "t_ctrl_bready",
+      "BVALID": "t_ctrl_bvalid",
+      "BRESP": "t_ctrl_bresp",
+      "WREADY": "t_ctrl_wready",
+      "RRESP": "t_ctrl_rresp",
+      "ARVALID": "t_ctrl_arvalid",
+      "ARREADY": "t_ctrl_arready",
+      "AWPROT": "t_ctrl_awprot",
+      "RREADY": "t_ctrl_rready",
+      "WSTRB": "t_ctrl_wstrb",
+      "RVALID": "t_ctrl_rvalid",
+      "AWADDR": "t_ctrl_awaddr",
+      "WVALID": "t_ctrl_wvalid",
+      "RDATA": "t_ctrl_rdata",
+      "ARADDR": "t_ctrl_araddr",
+      "AWREADY": "t_ctrl_awready",
+      "WDATA": "t_ctrl_wdata",
+      "AWVALID": "t_ctrl_awvalid"
+    }
+  },
+  component: {
+    vendor: 'sifive',
+    library: 'blocks',
+    name: 'capctl',
+    version: '0.1.0',
+    busInterfaces: [{
+        "name": "t_ctrl",
         "interfaceMode": "slave",
         "busType": {
-            "version": "r0p0_0",
-            "name": "AXI4-Lite",
-            "vendor": "amba.com",
-            "library": "AMBA4"
+            "version": "r0p0_0", "name": "AXI4Lite", "vendor": "amba.com", "library": "AMBA4"
         },
         "abstractionTypes": [
             {
-                "portMaps": {
-
-								    "ACLK"		: 'clk',
-								    // "ACLKEN"	: '',
-								    "ARESETn"	: 'reset_n',
-								    // "AWUSER"	: '',
-								    // "WUSER"		: '',
-								    // "BUSER"		: '',
-								    // "ARUSER"	: '',
-								    // "RUSER"		: '',
-
-                    "ARPROT": "t_ctrl_arprot",
-                    "BREADY": "t_ctrl_bready",
-                    "BVALID": "t_ctrl_bvalid",
-                    "BRESP": "t_ctrl_bresp",
-                    "WREADY": "t_ctrl_wready",
-                    "RRESP": "t_ctrl_rresp",
-                    "ARVALID": "t_ctrl_arvalid",
-                    "ARREADY": "t_ctrl_arready",
-                    "AWPROT": "t_ctrl_awprot",
-                    "RREADY": "t_ctrl_rready",
-                    "WSTRB": "t_ctrl_wstrb",
-                    "RVALID": "t_ctrl_rvalid",
-                    "AWADDR": "t_ctrl_awaddr",
-                    "WVALID": "t_ctrl_wvalid",
-                    "RDATA": "t_ctrl_rdata",
-                    "ARADDR": "t_ctrl_araddr",
-                    "AWREADY": "t_ctrl_awready",
-                    "WDATA": "t_ctrl_wdata",
-                    "AWVALID": "t_ctrl_awvalid"
-                },
-                "viewRef": "RTLview"
+                "viewRef": "RTLview",
+                portMaps: {$ref: '#/definitions/ctrlPortMap'},
             }
         ],
-        "name": "t_ctrl"
-    },
-  },
+        connectionRequired: true,
+        props: {
+          write_interleaving_depth: 1,
+          // lock_support: false,
+          read_reordering_depth: 1,
+          write_reordering_depth: 1,
+          outstanding_reads: 1, // optional
+          outstanding_writes: 1, // optional
+          outstanding_transactions: 1 // optional
+          }
+        }],
+        addressSpaces: [{
+          name: 'capctrlAddressSpace',
+          range: 1024,
+          width: 32
+        }],
+        memoryMaps: [],
+        model: {
+          views: [{
+            name: 'RTLview',
+            displayName: 'RTL View',
+            description: 'Simple RTL view of a component.',
+            envIdentifier: '*Synthesis:',
+            componentInstantiationRef: 'VerilogModel'
+          }],
+          instantiations: [],
+          ports: {$ref: '#/definitions/ports'}
+        },
+        componentGenerators: [],
+        fileSets: {
+          VerilogFiles: ['capctl.v']
+        },
+        pSchema: {},
+  }
 }

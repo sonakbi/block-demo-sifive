@@ -14,7 +14,27 @@ global def pioScalaModule =
   def name = "pio"
   def rootDir = "{blockPIOSifiveRoot}/craft/pio"
   def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
-  def deps = loopbackScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  def deps = pwmScalaModule, loopbackScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  makeScalaModule name rootDir scalaVersion
+  | setScalaModuleSourceDirs ("src", Nil)
+  | setScalaModuleDeps deps
+  | setScalaModuleScalacOptions ("-Xsource:2.11", Nil)
+
+global def pwmScalaModule =
+  def name = "PWM"
+  def rootDir = "{blockPIOSifiveRoot}/craft/pwm"
+  def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
+  def deps = sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  makeScalaModule name rootDir scalaVersion
+  | setScalaModuleSourceDirs ("src", Nil)
+  | setScalaModuleDeps deps
+  | setScalaModuleScalacOptions ("-Xsource:2.11", Nil)
+
+global def capctlScalaModule =
+  def name = "capctl"
+  def rootDir = "{blockPIOSifiveRoot}/craft/capctl"
+  def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
+  def deps = sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
   makeScalaModule name rootDir scalaVersion
   | setScalaModuleSourceDirs ("src", Nil)
   | setScalaModuleDeps deps
@@ -25,7 +45,17 @@ global def pioBlock =
   def config = "sifive.blocks.pio.WithpioTop"
   makeScalaBlock scalaModule config
 
-publish dutSimCompileOptionsHooks = pioHook, loopbackHook, Nil
+global def pwmBlock =
+  def scalaModule = pwmScalaModule
+  def config = "sifive.blocks.PWM.WithPWMTop"
+  makeScalaBlock scalaModule config
+
+global def capctlBlock =
+  def scalaModule = capctlScalaModule
+  def config = "sifive.blocks.capctl.WithcapctlTop"
+  makeScalaBlock scalaModule config
+
+publish dutSimCompileOptionsHooks = capctlHook, pwmHook, pioHook, loopbackHook, Nil
 
 def loopbackHook =
   def name = "loopback"
@@ -35,6 +65,17 @@ def loopbackHook =
 def pioHook =
   def name = "pio"
   def addSources = source "{blockPIOSifiveRoot}/rtl/pio/pio.sv", _
+  makeBlackBoxHook name (editDUTSimCompileOptionsSourceFiles addSources)
+
+def pwmHook =
+  def name = "PWM"
+  def addSources = source "{blockPIOSifiveRoot}/rtl/pwm/PWM.v", _
+  makeBlackBoxHook name (editDUTSimCompileOptionsSourceFiles addSources)
+  # def addSources = source ("{blockPIOSifiveRoot}/rtl/pwm/PWM.v {blockPIOSifiveRoot}/rtl/pwm/PTC.v"), _
+
+def capctlHook =
+  def name = "capctl"
+  def addSources = source "{blockPIOSifiveRoot}/rtl/capctl/capctl.sv", _
   makeBlackBoxHook name (editDUTSimCompileOptionsSourceFiles addSources)
 
 global def demo =
@@ -53,6 +94,16 @@ global def pioDUT =
   def blocks = pioBlock, Nil
   makeTestSocketDUT name blocks
 
+global def pwmDUT =
+  def name = "pwmDUT"
+  def blocks = pwmBlock, Nil
+  makeTestSocketDUT name blocks
+
+global def capctlDUT =
+  def name = "capctlDUT"
+  def blocks = capctlBlock, Nil
+  makeTestSocketDUT name blocks
+
 global def pioVC707DUT =
   def name = "pioVC707DUT"
   def blocks = pioBlock, Nil
@@ -63,7 +114,7 @@ publish dutTests = demoPioTest, Nil
 
 global def demoPioTest =
   def name = "demo"
-  def block = pioBlock
+  def block = pioBlock #capctlBlock #pwmBlock  #pioBlock
   def program = demo
   def plusargs =
     NamedArg        "verbose",

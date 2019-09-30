@@ -68,17 +68,36 @@ class PWM(
 }
 
 case class PWMParams(
+  ctrlParams: PctrlParams,
+  irqParams: PirqParams,
   cacheBlockBytes: Int
 )
 
-
+// busType: APB4, mode: slave
+// busType: interrupts, mode: master
 
 class LPWMBase(c: PWMParams)(implicit p: Parameters) extends LazyModule {
   val device = new SimpleDevice("PWM", Seq("sifive,PWM-v0"))
 
 
 
+  val ctrlNode = APBSlaveNode(Seq(
+    APBSlavePortParameters(
+      slaves = Seq(APBSlaveParameters(
+        address = List(AddressSet(c.ctrlParams.base, 0x7fL)),
+        // resources
+        // regionType
+        executable = false,
+        // nodePath
+        supportsWrite = true,
+        supportsRead  = true
+        // device
+      )),
+      beatBytes = 32 / 8
+    )
+  ))
 
+  val irqNode = IntSourceNode(IntSourcePortSimple(num = 1))
 
   val ioBridgeSource = BundleBridgeSource(() => new PWMBlackBoxIO(
 
@@ -89,6 +108,7 @@ class LPWMBase(c: PWMParams)(implicit p: Parameters) extends LazyModule {
 
     ))
     // interface wiring 2
+    // busType: APB4, mode: slave
 
     // port wiring
     blackbox.io.PCLK := ioBridgeSource.bundle.PCLK
@@ -118,13 +138,38 @@ class LPWMBase(c: PWMParams)(implicit p: Parameters) extends LazyModule {
     ioBridgeSource.bundle.PWM_OUT4 := blackbox.io.PWM_OUT4
     ioBridgeSource.bundle.PWM_OUT5 := blackbox.io.PWM_OUT5
     // interface alias
-
+    val ctrl0 = ctrlNode.in(0)._1
+    val irq0 = irqNode.out(0)._1
     // interface wiring
+    // wiring for ctrl of type APB4
+    // -> {"prdata":"dataWidth","pwrite":1,"penable":1,"psel":1,"pready":-1,"pslverr":1,"paddr":"addrWidth","pwdata":"dataWidth","pprot":3}ctrl0.prdata := blackbox.io.PRDATA
+    blackbox.io.PWRITE := ctrl0.pwrite
+    blackbox.io.PENABLE := ctrl0.penable
+    // PSEL
+    ctrl0.pready := true.B // PREADY
+    // PSLVERR
+    blackbox.io.PADDR := ctrl0.paddr
+    blackbox.io.PWDATA := ctrl0.pwdata
+    // PPROT
 
+    // wiring for irq of type interrupts
+    // ["INTptc0"]
   }
   lazy val module = new LPWMBaseImp
 }
 
+
+case class PctrlParams(
+  base: BigInt,
+  executable: Boolean = false,
+  maxFifoBits: Int = 2,
+  maxTransactions: Int = 1,
+  axi4BufferParams: AXI4BufferParams = AXI4BufferParams(),
+  tlBufferParams: TLBufferParams = TLBufferParams()
+)
+
+
+case class PirqParams()
 
 
 case class NPWMTopParams(
@@ -135,9 +180,12 @@ case class NPWMTopParams(
 
 object NPWMTopParams {
   def defaults(
+    ctrl_base: BigInt,
     cacheBlockBytes: Int
   ) = NPWMTopParams(
     blackbox = PWMParams(
+      ctrlParams = PctrlParams(base = ctrl_base),
+      irqParams = PirqParams(),
       cacheBlockBytes = cacheBlockBytes
     )
   )
@@ -148,6 +196,17 @@ class NPWMTopBase(c: NPWMTopParams)(implicit p: Parameters) extends SimpleLazyMo
 
 // no channel node
 
+  val ctrlNode: APBSlaveNode = imp.ctrlNode
+
+  def getctrlNodeTLAdapter(): TLInwardNode = {(
+    ctrlNode
+      := TLToAPB(false)
+      := TLBuffer()
+      := TLFragmenter((32 / 8), c.blackbox.cacheBlockBytes, holdFirstDeny=true)
+  )}
+
+
+  val irqNode: IntSourceNode = imp.irqNode
 }
 
 object NPWMTopBase {
@@ -155,18 +214,20 @@ object NPWMTopBase {
     implicit val p: Parameters = bap.p
     val PWM_top = LazyModule(new NPWMTop(c))
     // no channel attachment
-
+    bap.pbus.coupleTo("PWM_apb") { PWM_top.getctrlNodeTLAdapter() := TLWidthWidget(bap.pbus) := _ }
+    bap.ibus := PWM_top.irqNode
     PWM_top
   }
 }
 
 class WithPWMTopBase (
-
+  ctrl_base: BigInt
 ) extends Config((site, here, up) => {
   case BlockDescriptorKey =>
     BlockDescriptor(
       name = "PWM",
       place = NPWMTop.attach(NPWMTopParams.defaults(
+        ctrl_base = ctrl_base,
         cacheBlockBytes = site(CacheBlockBytes)
       ))
     ) +: up(BlockDescriptorKey, site)

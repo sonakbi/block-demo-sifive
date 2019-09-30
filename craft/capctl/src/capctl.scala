@@ -35,6 +35,17 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
 {
 
 // User code here
+  // route the ports of the black box to this sink
+  val ioBridgeSink = BundleBridgeSink[capctlBlackBoxIO]()
+  ioBridgeSink := imp.ioBridgeSource
+
+  // logic to connect ioBridgeSink/Source nodes
+  override lazy val module = new LazyModuleImp(this) {
+
+    // connect the clock and negedge reset to the default clock and reset
+    ioBridgeSink.bundle.clk     := clock.asUInt
+    ioBridgeSink.bundle.reset_n := !(reset.toBool)
+  }
 
 }
 
@@ -43,6 +54,7 @@ object NcapctlTop {
     val capctl = NcapctlTopBase.attach(c)(bap)
 
     // User code here
+    implicit val p: Parameters = bap.p
 
     capctl
   }
@@ -50,7 +62,7 @@ object NcapctlTop {
 
 class WithcapctlTop extends Config(
   new WithcapctlTopBase(
-
+    t_ctrl_base = 0x40000L
   )
 
     // User code here
