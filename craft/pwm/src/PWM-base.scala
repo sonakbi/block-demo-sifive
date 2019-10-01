@@ -97,7 +97,7 @@ class LPWMBase(c: PWMParams)(implicit p: Parameters) extends LazyModule {
     )
   ))
 
-  val irqNode = IntSourceNode(IntSourcePortSimple(num = 1))
+  val irqNode = IntSourceNode(IntSourcePortSimple(num = 6))
 
   val ioBridgeSource = BundleBridgeSource(() => new PWMBlackBoxIO(
 
@@ -153,7 +153,7 @@ class LPWMBase(c: PWMParams)(implicit p: Parameters) extends LazyModule {
     // PPROT
 
     // wiring for irq of type interrupts
-    // ["INTptc0"]
+    // ["INTptc0","INTptc1","INTptc2","INTptc3","INTptc4","INTptc5"]
   }
   lazy val module = new LPWMBaseImp
 }

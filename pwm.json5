@@ -84,7 +84,7 @@
         name: 'irq',
         interfaceMode: 'master',
         busType: {vendor: 'sifive.com', library: 'free', name: 'interrupts', version: '0.1.0'},
-        abstractionTypes: [{ viewRef: 'RTLview', portMaps: ['INTptc0'] }]
+        abstractionTypes: [{ viewRef: 'RTLview', portMaps: ['INTptc0','INTptc1','INTptc2','INTptc3','INTptc4','INTptc5'] }]
       }
     ],
     addressSpaces: [{

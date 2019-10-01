@@ -55,7 +55,13 @@ global def capctlBlock =
   def config = "sifive.blocks.capctl.WithcapctlTop"
   makeScalaBlock scalaModule config
 
+# publish dutSimCompileOptionsHooks = capctlHook, ptcHook, pwmHook, pioHook, loopbackHook, Nil
 publish dutSimCompileOptionsHooks = capctlHook, pwmHook, pioHook, loopbackHook, Nil
+
+#def ptcHook =
+#  def name = "PTC"
+#  def addSources = source "{blockPIOSifiveRoot}/rtl/pwm/PTC.v", _
+#  makeBlackBoxHook name (editDUTSimCompileOptionsSourceFiles addSources)
 
 def loopbackHook =
   def name = "loopback"
@@ -69,9 +75,8 @@ def pioHook =
 
 def pwmHook =
   def name = "PWM"
-  def addSources = source "{blockPIOSifiveRoot}/rtl/pwm/PWM.v", _
+  def addSources = source "{blockPIOSifiveRoot}/rtl/pwm/PWM.v", source "{blockPIOSifiveRoot}/rtl/pwm/PTC.v", _
   makeBlackBoxHook name (editDUTSimCompileOptionsSourceFiles addSources)
-  # def addSources = source ("{blockPIOSifiveRoot}/rtl/pwm/PWM.v {blockPIOSifiveRoot}/rtl/pwm/PTC.v"), _
 
 def capctlHook =
   def name = "capctl"
@@ -114,7 +119,7 @@ publish dutTests = demoPioTest, Nil
 
 global def demoPioTest =
   def name = "demo"
-  def block = pioBlock #capctlBlock #pwmBlock  #pioBlock
+  def block = pwmBlock #capctlBlock #pwmBlock  #pioBlock
   def program = demo
   def plusargs =
     NamedArg        "verbose",
