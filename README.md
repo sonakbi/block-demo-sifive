@@ -42,7 +42,9 @@ block-demo-sifive/rtl :
   ./rtl/pwm/PTC.v        : ptc verilog file
   ./rtl/capctl/capctl.sv : for controlling cap signal
 ```                                                                             
-                                                                             
+
+[run command]
+run_wake
                                                                              
                                                                              
                                                                              

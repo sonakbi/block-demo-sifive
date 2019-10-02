@@ -20,9 +20,9 @@ global def pioScalaModule =
   | setScalaModuleDeps deps
   | setScalaModuleScalacOptions ("-Xsource:2.11", Nil)
 
-global def pwmScalaModule =
-  def name = "PWM"
-  def rootDir = "{blockPIOSifiveRoot}/craft/pwm"
+global def capctlScalaModule =
+  def name = "capctl"
+  def rootDir = "{blockPIOSifiveRoot}/craft/capctl"
   def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
   def deps = sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
   makeScalaModule name rootDir scalaVersion
@@ -30,11 +30,11 @@ global def pwmScalaModule =
   | setScalaModuleDeps deps
   | setScalaModuleScalacOptions ("-Xsource:2.11", Nil)
 
-global def capctlScalaModule =
-  def name = "capctl"
-  def rootDir = "{blockPIOSifiveRoot}/craft/capctl"
+global def pwmScalaModule =
+  def name = "PWM"
+  def rootDir = "{blockPIOSifiveRoot}/craft/pwm"
   def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
-  def deps = sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  def deps = capctlScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
   makeScalaModule name rootDir scalaVersion
   | setScalaModuleSourceDirs ("src", Nil)
   | setScalaModuleDeps deps
@@ -55,13 +55,7 @@ global def capctlBlock =
   def config = "sifive.blocks.capctl.WithcapctlTop"
   makeScalaBlock scalaModule config
 
-# publish dutSimCompileOptionsHooks = capctlHook, ptcHook, pwmHook, pioHook, loopbackHook, Nil
 publish dutSimCompileOptionsHooks = capctlHook, pwmHook, pioHook, loopbackHook, Nil
-
-#def ptcHook =
-#  def name = "PTC"
-#  def addSources = source "{blockPIOSifiveRoot}/rtl/pwm/PTC.v", _
-#  makeBlackBoxHook name (editDUTSimCompileOptionsSourceFiles addSources)
 
 def loopbackHook =
   def name = "loopback"
@@ -94,6 +88,17 @@ global def demo =
   makeTestProgramPlan programName cFiles
   | setTestProgramPlanIncludeDirs ("{blockPIOSifiveRoot}/metal/drivers", Nil)
 
+global def all =
+  def programName = "all"
+  def cFiles =
+    source "{blockPIOSifiveRoot}/tests/all/main.c",
+    source "{blockPIOSifiveRoot}/metal/drivers/pio/sifive_pio0.h",
+    source "{blockPIOSifiveRoot}/metal/drivers/sifive_pio.c",
+    Nil
+
+  makeTestProgramPlan programName cFiles
+  | setTestProgramPlanIncludeDirs ("{blockPIOSifiveRoot}/metal/drivers", Nil)
+
 global def pioDUT =
   def name = "pioDUT"
   def blocks = pioBlock, Nil
@@ -101,12 +106,17 @@ global def pioDUT =
 
 global def pwmDUT =
   def name = "pwmDUT"
-  def blocks = pwmBlock, Nil
+  def blocks = pwmBlock, capctlBlock, Nil   #@tom add capcrlBlock
   makeTestSocketDUT name blocks
 
 global def capctlDUT =
   def name = "capctlDUT"
   def blocks = capctlBlock, Nil
+  makeTestSocketDUT name blocks
+
+global def demoDUT =
+  def name = "demoDUT"
+  def blocks = pwmBlock, capctlBlock, pioBlock, Nil   #@tom add capcrlBlock
   makeTestSocketDUT name blocks
 
 global def pioVC707DUT =
@@ -115,7 +125,19 @@ global def pioVC707DUT =
   def frequency = 50
   makeVC707TestSocketDUT name frequency blocks
 
-publish dutTests = demoPioTest, Nil
+publish dutTests = demoallTest, Nil   #demoPioTest
+
+global def demoallTest =
+  def name = "all"
+  def block = pwmBlock #capctlBlock #pwmBlock  #pioBlock
+  def program = all
+  def plusargs =
+    NamedArg        "verbose",
+    NamedArgInteger "random_seed"      1234,
+    NamedArgInteger "tilelink_timeout" 16000,
+    NamedArgInteger "max-cycles"       50000,
+    Nil
+  makeBlockTest name block program plusargs
 
 global def demoPioTest =
   def name = "demo"
