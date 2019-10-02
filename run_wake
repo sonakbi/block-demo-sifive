@@ -1,1 +1,1 @@
-wake 'runSimWith demoDUT Verilator_Waves'
+wake 'runSim demoDUT'
