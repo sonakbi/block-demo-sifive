@@ -49,12 +49,8 @@ run_wake
                                                                              
                                                                              
 ## Question & Answer
-Q1. What about the procedure for on-boarding of demo block?
-   (including PWM, capctl, pio, loopback module)
-
-Q2. Can we on-board seperate module? or do we have to make top verilog module for onboarding?
-
-
+Q1. How do I connect capctl and PWM module?
+    (example loopback module is vip, but capctl is ip)
                                                                              
 
 
