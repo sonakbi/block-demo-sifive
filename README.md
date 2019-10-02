@@ -44,7 +44,7 @@ block-demo-sifive/rtl :
 ```                                                                             
 
 [run command]
-run_wake
+``` run_wake ```
                                                                              
                                                                              
                                                                              
