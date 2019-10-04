@@ -142,10 +142,11 @@ class LPWMBase(c: PWMParams)(implicit p: Parameters) extends LazyModule {
     val irq0 = irqNode.out(0)._1
     // interface wiring
     // wiring for ctrl of type APB4
-    // -> {"prdata":"dataWidth","pwrite":1,"penable":1,"psel":1,"pready":-1,"pslverr":1,"paddr":"addrWidth","pwdata":"dataWidth","pprot":3}ctrl0.prdata := blackbox.io.PRDATA
+    // -> {"prdata":"dataWidth","pwrite":1,"penable":1,"psel":1,"pready":-1,"pslverr":1,"paddr":"addrWidth","pwdata":"dataWidth","pprot":3}
+    ctrl0.prdata := blackbox.io.PRDATA  // @tom add
     blackbox.io.PWRITE := ctrl0.pwrite
     blackbox.io.PENABLE := ctrl0.penable
-    // PSEL
+    blackbox.io.PSELPTC := ctrl0.psel
     ctrl0.pready := true.B // PREADY
     // PSLVERR
     blackbox.io.PADDR := ctrl0.paddr

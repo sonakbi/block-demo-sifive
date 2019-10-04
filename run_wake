@@ -1,1 +1,2 @@
 wake 'runSim demoDUT'
+# wake 'runSimWith demoDUT Verilator_Waves'

@@ -31,7 +31,7 @@
     },
     ctrlPortMap: {
           "PCLK": "PCLK",
-          "PSELx": "PSELPTC",
+          "PSEL": "PSELPTC",
           "PWRITE": "PWRITE",
           // "__UMAP__": [
           //     [

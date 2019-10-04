@@ -42,13 +42,13 @@ int main() {
 //    }
     // ============= pwm    test =================================
     for (int i = 0; i < test_len; i++) {
-        pwm(i%3) = i;
-        fail |= (pwm(i) != i);
+        pwm(i%2) = i;
+        fail |= (pwm(i%2) != i);
     }
     // ============= capctl test =================================
     for (int i = 0; i < test_len; i++) {
-        capctl(i%3) = i;
-        fail |= (capctl(i) != i);
+        capctl(i%2) = i;
+        fail |= (capctl(i%2) != i);
     }
     // ===========================================================
     return fail;
