@@ -22,7 +22,15 @@ import freechips.rocketchip.regmapper._
 import sifive.skeleton._
 import sifive.blocks.util.{NonBlockingEnqueue, NonBlockingDequeue}
 
+// @tom add start
+//import sifive.blocks.PWM._
+import sifive.blocks._
 
+class NcapctlTopIO(
+) extends Bundle {
+  val odata = Output(UInt((6).W))
+}
+// end
 
 class Lcapctl(c: capctlParams)(implicit p: Parameters) extends LcapctlBase(c)(p)
 {
@@ -39,6 +47,11 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
   val ioBridgeSink = BundleBridgeSink[capctlBlackBoxIO]()
   ioBridgeSink := imp.ioBridgeSource
 
+// @tom add start
+  // create a new ports for odata
+  val ioBridgeSource = BundleBridgeSource(() => new NcapctlTopIO())
+// end
+
   // logic to connect ioBridgeSink/Source nodes
   override lazy val module = new LazyModuleImp(this) {
 
@@ -46,6 +59,11 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
     ioBridgeSink.bundle.clk     := clock.asUInt
     ioBridgeSink.bundle.reset_n := !(reset.toBool)
   }
+
+// @tom add start
+    // connect ioBridge source and sink
+    ioBridgeSource.bundle.odata   := ioBridgeSink.bundle.odata
+// end
 
 }
 
@@ -56,6 +74,31 @@ object NcapctlTop {
     // User code here
     implicit val p: Parameters = bap.p
 
+// @tom add start
+    // @tom add instantiate and connect the PWM in modules
+    // bap.testHarness 
+    {
+      // instantiate the PWM vip
+      val PWMP = NPWMTopParams(
+        blackbox = PWMParams(
+          //capctlWidth = c.blackbox.capctlWidth,
+          cacheBlockBytes = p(CacheBlockBytes)))
+      val PWM = NPWMTop.attach(PWMP)(bap)
+
+      // route PWM signals to the testharness
+      val PWMNode = BundleBridgeSink[PWMBlackBoxIO]()
+      PWMNode := PWM.imp.ioBridgeSource
+
+      // route capctl signals to the testharness
+      val capctlNode = BundleBridgeSink[NcapctlTocapctl]()
+      capctlNode := capctl.ioBridgeSource
+
+      // connect the capctl and PWM signals
+      InModuleBody {
+        PWMNode.bundle.odata   := capctlNode.bundle.odata
+      }
+    }
+// end
     capctl
   }
 }
