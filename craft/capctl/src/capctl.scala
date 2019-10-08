@@ -23,8 +23,8 @@ import sifive.skeleton._
 import sifive.blocks.util.{NonBlockingEnqueue, NonBlockingDequeue}
 
 // @tom add start
-//import sifive.blocks.PWM._
-import sifive.blocks._
+import sifive.blocks.PWM._
+//import sifive.blocks._
 
 class NcapctlTopIO(
 ) extends Bundle {
@@ -82,6 +82,8 @@ object NcapctlTop {
       val PWMP = NPWMTopParams(
         blackbox = PWMParams(
           //capctlWidth = c.blackbox.capctlWidth,
+					ctrlParams = p(PctrlParams),
+					irqParams = p(PirqParams),
           cacheBlockBytes = p(CacheBlockBytes)))
       val PWM = NPWMTop.attach(PWMP)(bap)
 
@@ -95,7 +97,12 @@ object NcapctlTop {
 
       // connect the capctl and PWM signals
       InModuleBody {
-        PWMNode.bundle.odata   := capctlNode.bundle.odata
+        PWMNode.bundle.capt0_event   := capctlNode.bundle.odata(0)
+        PWMNode.bundle.capt1_event   := capctlNode.bundle.odata(1)
+        PWMNode.bundle.capt2_event   := capctlNode.bundle.odata(2)
+        PWMNode.bundle.capt3_event   := capctlNode.bundle.odata(3)
+        PWMNode.bundle.capt4_event   := capctlNode.bundle.odata(4)
+        PWMNode.bundle.capt5_event   := capctlNode.bundle.odata(5)
       }
     }
 // end

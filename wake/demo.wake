@@ -24,7 +24,7 @@ global def capctlScalaModule =
   def name = "capctl"
   def rootDir = "{blockPIOSifiveRoot}/craft/capctl"
   def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
-  def deps = sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  def deps = pwmScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
   makeScalaModule name rootDir scalaVersion
   | setScalaModuleSourceDirs ("src", Nil)
   | setScalaModuleDeps deps
@@ -34,7 +34,7 @@ global def pwmScalaModule =
   def name = "PWM"
   def rootDir = "{blockPIOSifiveRoot}/craft/pwm"
   def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
-  def deps = capctlScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  def deps = sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
   makeScalaModule name rootDir scalaVersion
   | setScalaModuleSourceDirs ("src", Nil)
   | setScalaModuleDeps deps
