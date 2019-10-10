@@ -24,6 +24,14 @@ import sifive.blocks.util.{NonBlockingEnqueue, NonBlockingDequeue}
 
 import sifive.blocks.PWM._
 
+//@tom
+class NcapctlTopIO(
+) extends Bundle {
+  val odata = Output(UInt((6).W))
+}
+//
+
+
 class Lcapctl(c: capctlParams)(implicit p: Parameters) extends LcapctlBase(c)(p)
 {
 
@@ -40,7 +48,7 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
   ioBridgeSink := imp.ioBridgeSource
 
   // create a new ports for odata
-  val pwmIO = BundleBridgeSink[NPWMTopIO]
+  val ioNode = BundleBridgeSource(() => new NcapctlTopIO())
 
   // logic to connect ioBridgeSink/Source nodes
   override lazy val module = new LazyModuleImp(this) {
@@ -51,12 +59,7 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
 
     // connect ioBridge source and sink
 
-    pwmIO.bundle.capt0_event := ioBridgeSink.bundle.odata(0)
-    pwmIO.bundle.capt1_event := ioBridgeSink.bundle.odata(1)
-    pwmIO.bundle.capt2_event := ioBridgeSink.bundle.odata(2)
-    pwmIO.bundle.capt3_event := ioBridgeSink.bundle.odata(3)
-    pwmIO.bundle.capt4_event := ioBridgeSink.bundle.odata(4)
-    pwmIO.bundle.capt5_event := ioBridgeSink.bundle.odata(5)
+    ioNode.bundle.odata := ioBridgeSink.bundle.odata
   }
 
 }
@@ -69,7 +72,19 @@ object NcapctlTop {
     implicit val p: Parameters = bap.p
 
     // connect the PWM and capctl signals
-    capctl.pwmIO := pwm.ioBridgeSource
+    val capctlNode = BundleBridgeSink[NcapctlTopIO]
+    capctlNode := capctl.ioNode
+
+    val pwmNode = BundleBridgeSink[NPWMTopIO]
+    pwmNode := pwm.ioNode
+
+    InModuleBody {
+      pwmNode.bundle.capt1_event := capctlNode.bundle.odata(1)
+      pwmNode.bundle.capt2_event := capctlNode.bundle.odata(2)
+      pwmNode.bundle.capt3_event := capctlNode.bundle.odata(3)
+      pwmNode.bundle.capt4_event := capctlNode.bundle.odata(4)
+      pwmNode.bundle.capt5_event := capctlNode.bundle.odata(5)
+    }
 
     capctl
   }
