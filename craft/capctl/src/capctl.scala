@@ -24,13 +24,6 @@ import sifive.blocks.util.{NonBlockingEnqueue, NonBlockingDequeue}
 
 import sifive.blocks.PWM._
 
-//@tom
-class NcapctlTopIO(
-) extends Bundle {
-  val odata = Output(UInt((6).W))
-}
-//
-
 class Lcapctl(c: capctlParams)(implicit p: Parameters) extends LcapctlBase(c)(p)
 {
 
@@ -47,7 +40,7 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
   ioBridgeSink := imp.ioBridgeSource
 
   // create a new ports for odata
-  val ioBridgeSource = BundleBridgeSource(() => new NcapctlTopIO())
+  val pwmIO = BundleBridgeSink[NPWMTopIO]
 
   // logic to connect ioBridgeSink/Source nodes
   override lazy val module = new LazyModuleImp(this) {
@@ -57,7 +50,13 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
     ioBridgeSink.bundle.reset_n := !(reset.toBool)
 
     // connect ioBridge source and sink
-    ioBridgeSource.bundle.odata   := ioBridgeSink.bundle.odata
+
+    pwmIO.bundle.capt0_event := ioBridgeSink.bundle.odata(0)
+    pwmIO.bundle.capt1_event := ioBridgeSink.bundle.odata(1)
+    pwmIO.bundle.capt2_event := ioBridgeSink.bundle.odata(2)
+    pwmIO.bundle.capt3_event := ioBridgeSink.bundle.odata(3)
+    pwmIO.bundle.capt4_event := ioBridgeSink.bundle.odata(4)
+    pwmIO.bundle.capt5_event := ioBridgeSink.bundle.odata(5)
   }
 
 }
@@ -65,35 +64,12 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
 object NcapctlTop {
   def attach(c: NcapctlTopParams)(bap: BlockAttachParams): NcapctlTop = {
     val capctl = NcapctlTopBase.attach(c)(bap)
+    val pwm = NPWMTopBase.attach(NPWMTopParams.defaults(0x70000L, c.blackbox.cacheBlockBytes))(bap)
 
-    // User code here
     implicit val p: Parameters = bap.p
 
-//------------------------------------------------------------------
-    // instantiate and connect the capctl
-    // bap.testHarness {
-    {
-
-      // route capctl signals to the testharness
-      val capctlNode = BundleBridgeSink[NcapctlTopIO]()
-      capctlNode := capctl.ioBridgeSource
-
-      // route PWM signals to the testharness
-      // val PWMNode = BundleBridgeSink[NPWMTopIO]()
-      // PWMNode := NPWMTop.PWM.ioBridgeSource
-
-      // connect the PWM and capctl signals
-      InModuleBody {
-          // PWMNode.bundle.capt0_event     := capctlNode.bundle.odata(0) 
-          // PWMNode.bundle.capt1_event     := capctlNode.bundle.odata(1) 
-          // PWMNode.bundle.capt2_event     := capctlNode.bundle.odata(2) 
-          // PWMNode.bundle.capt3_event     := capctlNode.bundle.odata(3) 
-          // PWMNode.bundle.capt4_event     := capctlNode.bundle.odata(4) 
-          // PWMNode.bundle.capt5_event     := capctlNode.bundle.odata(5) 
-      }
-    }
-
-//------------------------------------------------------------------
+    // connect the PWM and capctl signals
+    capctl.pwmIO := pwm.ioBridgeSource
 
     capctl
   }

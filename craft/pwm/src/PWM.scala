@@ -74,11 +74,6 @@ object NPWMTop {
     val PWM = NPWMTopBase.attach(c)(bap)
 
     // User code here
-    implicit val p: Parameters = bap.p
-
-      // route PWM signals to the testharness
-      val PWMNode = BundleBridgeSink[NPWMTopIO]()
-      PWMNode := PWM.ioBridgeSource
 
     PWM
   }
