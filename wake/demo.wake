@@ -14,7 +14,7 @@ global def pioScalaModule =
   def name = "pio"
   def rootDir = "{blockPIOSifiveRoot}/craft/pio"
   def scalaVersion = sifiveSkeletonScalaModule.getScalaModuleScalaVersion
-  def deps = pwmScalaModule, loopbackScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
+  def deps = loopbackScalaModule, sifiveBlocksScalaModule, sifiveSkeletonScalaModule, Nil
   makeScalaModule name rootDir scalaVersion
   | setScalaModuleSourceDirs ("src", Nil)
   | setScalaModuleDeps deps
