@@ -78,6 +78,7 @@ object NcapctlTop {
     // @tom add instantiate and connect the PWM in modules
     // bap.testHarness 
     {
+    /*
       // instantiate the PWM vip
       val PWMP = NPWMTopParams(
         blackbox = PWMParams(
@@ -89,10 +90,10 @@ object NcapctlTop {
 
       // route PWM signals to the testharness
       val PWMNode = BundleBridgeSink[PWMBlackBoxIO]()
-      PWMNode := PWM.imp.ioBridgeSource
+      //PWMNode := PWM.imp.ioBridgeSource
 
       // route capctl signals to the testharness
-      val capctlNode = BundleBridgeSink[NcapctlTocapctl]()
+      val capctlNode = BundleBridgeSink[NcapctlTopIO]()
       capctlNode := capctl.ioBridgeSource
 
       // connect the capctl and PWM signals
@@ -104,6 +105,7 @@ object NcapctlTop {
         PWMNode.bundle.capt4_event   := capctlNode.bundle.odata(4)
         PWMNode.bundle.capt5_event   := capctlNode.bundle.odata(5)
       }
+*/
     }
 // end
     capctl
