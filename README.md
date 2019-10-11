@@ -1,4 +1,4 @@
-## Start
+## Summary
 This demo project files are copied from block-pio-sifive files at first.
 and modified for similar to the ddr4 on-boarding environment.
 
@@ -46,12 +46,4 @@ block-demo-sifive/rtl :
 [run command]
 
 ``` run_wake ```
-                                                                             
-                                                                             
-                                                                             
-## Question & Answer
-Q1. How do I connect capctl and PWM module?
-    (example loopback module is vip, but capctl is ip)
-                                                                             
-
 

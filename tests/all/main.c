@@ -4,7 +4,7 @@
 
 #define CAPCTL_BASE 0x40000
 #define PIO_BASE    0x60000
-#define PWM_BASE    0x80000
+#define PWM_BASE    0x70000
 
 #define pio(x)     *((char *)(PIO_BASE+x*4))
 #define pwm(x)     *((char *)(PWM_BASE+x*4))
@@ -14,7 +14,7 @@
 int main() {
 
     int fail = 0;
-    int test_len = 20;
+    int test_len = 32;
     // ============= pio test =================================
     // read/write to axi block
     uint32_t odatas[5] = {0xDEADBEEF, 0xF0F0F0F0, 0xABCD1234, 0x01234567,

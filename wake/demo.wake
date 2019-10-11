@@ -129,7 +129,7 @@ publish dutTests = demoallTest, Nil   #demoPioTest
 
 global def demoallTest =
   def name = "all"
-  def block = pwmBlock #capctlBlock #pwmBlock  #pioBlock
+  def block = capctlBlock #capctlBlock #pwmBlock  #pioBlock
   def program = all
   def plusargs =
     NamedArg        "verbose",
