@@ -79,6 +79,7 @@ object NcapctlTop {
     pwmNode := pwm.ioNode
 
     InModuleBody {
+      pwmNode.bundle.capt0_event := capctlNode.bundle.odata(0)
       pwmNode.bundle.capt1_event := capctlNode.bundle.odata(1)
       pwmNode.bundle.capt2_event := capctlNode.bundle.odata(2)
       pwmNode.bundle.capt3_event := capctlNode.bundle.odata(3)
