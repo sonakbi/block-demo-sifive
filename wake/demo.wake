@@ -116,7 +116,7 @@ global def capctlDUT =
 
 global def demoDUT =
   def name = "demoDUT"
-  def blocks = pwmBlock, capctlBlock, pioBlock, Nil   #@tom add capcrlBlock
+  def blocks = capctlBlock, pioBlock, Nil   #@tom add capcrlBlock
   makeTestSocketDUT name blocks
 
 global def pioVC707DUT =

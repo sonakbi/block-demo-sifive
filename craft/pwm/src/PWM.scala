@@ -48,7 +48,7 @@ class NPWMTop(c: NPWMTopParams)(implicit p: Parameters) extends NPWMTopBase(c)(p
   ioBridgeSink := imp.ioBridgeSource
 
   // create a new ports for capt0~5_event
-  val ioBridgeSource = BundleBridgeSource(() => new NPWMTopIO())
+  val ioNode = BundleBridgeSource(() => new NPWMTopIO())
 
   // logic to connect ioBridgeSink/Source nodes
   override lazy val module = new LazyModuleImp(this) {
@@ -59,12 +59,12 @@ class NPWMTop(c: NPWMTopParams)(implicit p: Parameters) extends NPWMTopBase(c)(p
 
 
     // connect ioBridge source and sink
-    ioBridgeSink.bundle.capt0_event   := ioBridgeSource.bundle.capt0_event
-    ioBridgeSink.bundle.capt1_event   := ioBridgeSource.bundle.capt1_event
-    ioBridgeSink.bundle.capt2_event   := ioBridgeSource.bundle.capt2_event
-    ioBridgeSink.bundle.capt3_event   := ioBridgeSource.bundle.capt3_event
-    ioBridgeSink.bundle.capt4_event   := ioBridgeSource.bundle.capt4_event
-    ioBridgeSink.bundle.capt5_event   := ioBridgeSource.bundle.capt5_event
+    ioBridgeSink.bundle.capt0_event   := ioNode.bundle.capt0_event
+    ioBridgeSink.bundle.capt1_event   := ioNode.bundle.capt1_event
+    ioBridgeSink.bundle.capt2_event   := ioNode.bundle.capt2_event
+    ioBridgeSink.bundle.capt3_event   := ioNode.bundle.capt3_event
+    ioBridgeSink.bundle.capt4_event   := ioNode.bundle.capt4_event
+    ioBridgeSink.bundle.capt5_event   := ioNode.bundle.capt5_event
   }
 
 }
@@ -74,11 +74,6 @@ object NPWMTop {
     val PWM = NPWMTopBase.attach(c)(bap)
 
     // User code here
-    implicit val p: Parameters = bap.p
-
-      // route PWM signals to the testharness
-      val PWMNode = BundleBridgeSink[NPWMTopIO]()
-      PWMNode := PWM.ioBridgeSource
 
     PWM
   }

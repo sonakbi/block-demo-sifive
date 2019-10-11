@@ -31,6 +31,7 @@ class NcapctlTopIO(
 }
 //
 
+
 class Lcapctl(c: capctlParams)(implicit p: Parameters) extends LcapctlBase(c)(p)
 {
 
@@ -47,7 +48,7 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
   ioBridgeSink := imp.ioBridgeSource
 
   // create a new ports for odata
-  val ioBridgeSource = BundleBridgeSource(() => new NcapctlTopIO())
+  val ioNode = BundleBridgeSource(() => new NcapctlTopIO())
 
   // logic to connect ioBridgeSink/Source nodes
   override lazy val module = new LazyModuleImp(this) {
@@ -57,7 +58,8 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
     ioBridgeSink.bundle.reset_n := !(reset.toBool)
 
     // connect ioBridge source and sink
-    ioBridgeSource.bundle.odata   := ioBridgeSink.bundle.odata
+
+    ioNode.bundle.odata := ioBridgeSink.bundle.odata
   }
 
 }
@@ -65,35 +67,24 @@ class NcapctlTop(c: NcapctlTopParams)(implicit p: Parameters) extends NcapctlTop
 object NcapctlTop {
   def attach(c: NcapctlTopParams)(bap: BlockAttachParams): NcapctlTop = {
     val capctl = NcapctlTopBase.attach(c)(bap)
+    val pwm = NPWMTopBase.attach(NPWMTopParams.defaults(0x70000L, c.blackbox.cacheBlockBytes))(bap)
 
-    // User code here
     implicit val p: Parameters = bap.p
 
-//------------------------------------------------------------------
-    // instantiate and connect the capctl
-    // bap.testHarness {
-    {
+    // connect the PWM and capctl signals
+    val capctlNode = BundleBridgeSink[NcapctlTopIO]
+    capctlNode := capctl.ioNode
 
-      // route capctl signals to the testharness
-      val capctlNode = BundleBridgeSink[NcapctlTopIO]()
-      capctlNode := capctl.ioBridgeSource
+    val pwmNode = BundleBridgeSink[NPWMTopIO]
+    pwmNode := pwm.ioNode
 
-      // route PWM signals to the testharness
-      // val PWMNode = BundleBridgeSink[NPWMTopIO]()
-      // PWMNode := NPWMTop.PWM.ioBridgeSource
-
-      // connect the PWM and capctl signals
-      InModuleBody {
-          // PWMNode.bundle.capt0_event     := capctlNode.bundle.odata(0) 
-          // PWMNode.bundle.capt1_event     := capctlNode.bundle.odata(1) 
-          // PWMNode.bundle.capt2_event     := capctlNode.bundle.odata(2) 
-          // PWMNode.bundle.capt3_event     := capctlNode.bundle.odata(3) 
-          // PWMNode.bundle.capt4_event     := capctlNode.bundle.odata(4) 
-          // PWMNode.bundle.capt5_event     := capctlNode.bundle.odata(5) 
-      }
+    InModuleBody {
+      pwmNode.bundle.capt1_event := capctlNode.bundle.odata(1)
+      pwmNode.bundle.capt2_event := capctlNode.bundle.odata(2)
+      pwmNode.bundle.capt3_event := capctlNode.bundle.odata(3)
+      pwmNode.bundle.capt4_event := capctlNode.bundle.odata(4)
+      pwmNode.bundle.capt5_event := capctlNode.bundle.odata(5)
     }
-
-//------------------------------------------------------------------
 
     capctl
   }
